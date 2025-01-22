@@ -69,6 +69,19 @@ defmodule Explorer.MicroserviceInterfaces.Metadata do
     end
   end
 
+  @doc """
+  Searches for metadata tags by name, handling pagination via `next_page_params`.
+
+  ## Parameters
+    - `name`: The name of the tag to search for.
+    - `next_page_params`: A map containing pagination parameters from the previous request.
+
+  ## Returns
+    - `{:ok, %{items: list(), next_page_params: map() | nil}}` on success.
+    - `{:error, String.t()}` on error.
+    - `:disabled` if the microservice is disabled.
+  """
+  @spec search_tags_by_name(String.t(), map() | nil) :: {:ok, map()} | :disabled | {:error, String.t()}
   def search_tags_by_name(name, next_page_params) do
     case Microservice.check_enabled(__MODULE__) do
       :ok ->
