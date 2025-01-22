@@ -4,7 +4,8 @@ defmodule Explorer.Chain.SmartContract.Proxy.EIP930 do
   """
 
   alias Explorer.Chain.SmartContract
-  alias Explorer.Chain.SmartContract.Proxy.{Basic, EIP1967}
+  alias Explorer.Chain.SmartContract.Proxy.EIP1967
+  alias Explorer.Helper, as: ExplorerHelper
   alias Explorer.SmartContract.Reader
 
   @doc """
@@ -25,6 +26,6 @@ defmodule Explorer.Chain.SmartContract.Proxy.EIP930 do
         _ -> nil
       end
 
-    Basic.adds_0x_to_address(implementation_address)
+    ExplorerHelper.adds_0x_prefix(implementation_address)
   end
 end

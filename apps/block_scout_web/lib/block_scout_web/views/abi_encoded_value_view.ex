@@ -11,6 +11,7 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
 
   alias ABI.FunctionSelector
   alias Explorer.Chain.{Address, Hash}
+  alias Explorer.Helper, as: ExplorerHelper
   alias Phoenix.HTML
   alias Phoenix.HTML.Safe
 
@@ -58,7 +59,7 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
   end
 
   defp do_copy_text({:bytes, _type}, value) do
-    hex(value)
+    ExplorerHelper.adds_0x_prefix(value)
   end
 
   defp do_copy_text({:array, type, _}, value) do
@@ -79,11 +80,11 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
   end
 
   defp do_copy_text(_, {:dynamic, value}) do
-    hex(value)
+    ExplorerHelper.adds_0x_prefix(value)
   end
 
   defp do_copy_text(type, value) when type in [:bytes, :address] do
-    hex(value)
+    ExplorerHelper.adds_0x_prefix(value)
   end
 
   defp do_copy_text({:tuple, types}, value) do
@@ -174,14 +175,14 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
   defp base_value_html(_, {:dynamic, value}, _no_links) do
     assigns = %{value: value}
 
-    ~H|<%= hex(@value) %>|
+    ~H|<%= ExplorerHelper.adds_0x_prefix(@value) %>|
   end
 
   defp base_value_html(:address, value, no_links) do
     if no_links do
       base_value_html(:address_text, value, no_links)
     else
-      address = hex(value)
+      address = ExplorerHelper.adds_0x_prefix(value)
       path = address_path(BlockScoutWeb.Endpoint, :show, address)
 
       assigns = %{address: address, path: path}
@@ -193,13 +194,13 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
   defp base_value_html(:address_text, value, _no_links) do
     assigns = %{value: value}
 
-    ~H|<%= hex(@value) %>|
+    ~H|<%= ExplorerHelper.adds_0x_prefix(@value) %>|
   end
 
   defp base_value_html(:bytes, value, _no_links) do
     assigns = %{value: value}
 
-    ~H|<%= hex(@value) %>|
+    ~H|<%= ExplorerHelper.adds_0x_prefix(@value) %>|
   end
 
   defp base_value_html(_, value, _no_links), do: HTML.html_escape(value)
@@ -253,9 +254,6 @@ defmodule BlockScoutWeb.ABIEncodedValueView do
   end
 
   defp base_value_json(_, value), do: to_string(value)
-
-  defp hex("0x" <> value), do: "0x" <> value
-  defp hex(value), do: "0x" <> Base.encode16(value, case: :lower)
 
   defp hex_for_json(value), do: "0x" <> Base.encode16(value, case: :lower)
 end

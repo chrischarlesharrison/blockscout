@@ -10,6 +10,7 @@ defmodule Indexer.Fetcher.OnDemand.TokenTotalSupply do
   alias Explorer.Chain.Cache.BlockNumber
   alias Explorer.Chain.Events.Publisher
   alias Explorer.Chain.{Hash, Token}
+  alias Explorer.Helper, as: ExplorerHelper
   alias Explorer.Token.MetadataRetriever
 
   @ttl_in_blocks 1
@@ -48,7 +49,7 @@ defmodule Indexer.Fetcher.OnDemand.TokenTotalSupply do
 
     if is_nil(token.total_supply_updated_at_block) or
          BlockNumber.get_max() - token.total_supply_updated_at_block > @ttl_in_blocks do
-      token_address_hash = "0x" <> Base.encode16(address_hash.bytes)
+      token_address_hash = ExplorerHelper.adds_0x_prefix(address_hash.bytes)
 
       token_params =
         token_address_hash
