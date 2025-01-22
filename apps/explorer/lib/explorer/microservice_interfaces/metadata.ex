@@ -69,6 +69,23 @@ defmodule Explorer.MicroserviceInterfaces.Metadata do
     end
   end
 
+  def search_tags_by_name(name, next_page_params) do
+    case Microservice.check_enabled(__MODULE__) do
+      :ok ->
+        params =
+          Map.merge(next_page_params || %{}, %{
+            name: name,
+            chain_id: Application.get_env(:block_scout_web, :chain_id),
+            tag_types: "protocol,name"
+          })
+
+        http_get_request(tags_search_url(), params, &prepare_search_results/1)
+
+      _ ->
+        :disabled
+    end
+  end
+
   defp http_get_request(url, params, parsing_function \\ &decode_meta/1) do
     headers = []
 
@@ -119,6 +136,10 @@ defmodule Explorer.MicroserviceInterfaces.Metadata do
 
   defp addresses_url do
     "#{base_url()}/addresses"
+  end
+
+  def tags_search_url do
+    "#{base_url()}/tags%3Asearch"
   end
 
   defp base_url do
@@ -182,4 +203,22 @@ defmodule Explorer.MicroserviceInterfaces.Metadata do
   end
 
   defp prepare_addresses_response(_), do: :error
+
+  defp prepare_search_results({:ok, %{"items" => items, "next_page_params" => next_page_params}}) do
+    items =
+      Enum.reduce(items, [], fn %{"tag" => tag, "addresses" => addresses}, tags_list ->
+        prepared_tag = decode_meta_in_tag(tag)
+
+        (tags_list ++
+           Enum.map(addresses, fn address ->
+             address_hash = Chain.string_to_address_hash_or_nil(address)
+             address_hash && %{metadata: prepared_tag, hash: address_hash}
+           end))
+        |> Enum.reject(&is_nil/1)
+      end)
+
+    {:ok, %{items: items, next_page_params: next_page_params}}
+  end
+
+  defp prepare_search_results(_), do: :error
 end
