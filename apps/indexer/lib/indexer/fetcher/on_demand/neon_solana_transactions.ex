@@ -10,29 +10,34 @@ defmodule Indexer.Fetcher.OnDemand.NeonSolanaTransactions do
   alias Explorer.Chain.Neon.LinkedSolanaTransactions
   alias Explorer.Repo
 
-  def trigger_fetch(transaction_hash,decoded_transaction_hash) do
+  def trigger_fetch(transaction_hash, decoded_transaction_hash) do
     arguments = Application.fetch_env!(:indexer, :json_rpc_named_arguments)
+
     case EthereumJSONRPC.get_linked_solana_transactions(transaction_hash, arguments) do
-      # and Enum.all?(linked_transactions, &is_binary/1)
-      {:ok, fetched} when is_list(fetched)->
-        cache(decoded_transaction_hash, fetched)
+      {:ok, fetched} when is_list(fetched) ->
+        save_cache(decoded_transaction_hash, fetched)
         {:ok, fetched}
+
       {:ok, bad_response} ->
         Logger.warning("Got bad response from NeonEVM Node: #{bad_response}")
         {:error, "Invalid response from node"}
-      {:error, reason} -> {:error, "Unable to fetch data from the node: #{inspect(reason)}"}
+
+      {:error, reason} ->
+        {:error, "Unable to fetch data from the node: #{inspect(reason)}"}
     end
   end
 
-  def query_from_db(decoded_transaction_hash) do
-   Repo.all(from(
-      solanaTransaction in LinkedSolanaTransactions,
-      where: solanaTransaction.neon_transaction_hash == ^decoded_transaction_hash,
-      select: solanaTransaction.solana_transaction_hash
-    ))
+  def cache(decoded_transaction_hash) do
+    Repo.all(
+      from(
+        solanaTransaction in LinkedSolanaTransactions,
+        where: solanaTransaction.neon_transaction_hash == ^decoded_transaction_hash,
+        select: solanaTransaction.solana_transaction_hash
+      )
+    )
   end
 
-  defp cache(decoded_transaction_hash, fetched) do
+  defp save_cache(decoded_transaction_hash, fetched) do
     entries =
       Enum.map(fetched, fn sol_transaction_hash_string ->
         %{
@@ -43,17 +48,19 @@ defmodule Indexer.Fetcher.OnDemand.NeonSolanaTransactions do
         }
       end)
 
-    Repo.transaction(fn ->
-      Repo.insert_all(
-        LinkedSolanaTransactions,
-        entries,
-        on_conflict: :nothing, # Ignore duplicates
-        conflict_target: [:neon_transaction_hash, :solana_transaction_hash]
-      )
-    end)
+    case Repo.transaction(fn ->
+           Repo.insert_all(
+             LinkedSolanaTransactions,
+             entries,
+             # Ignore duplicates
+             on_conflict: :nothing,
+             conflict_target: [:neon_transaction_hash, :solana_transaction_hash]
+           )
+         end) do
+      {:ok, _result} -> nil
+      {:error, reason} -> Logger.warning("failed to save cache: #{inspect(reason)}")
+    end
   end
-
-
 
   @spec maybe_fetch(EthereumJSONRPC.hash()) :: {:ok, list} | {:error, String.t()}
   def maybe_fetch(transaction_hash) do
@@ -61,12 +68,12 @@ defmodule Indexer.Fetcher.OnDemand.NeonSolanaTransactions do
 
     case Base.decode16(transaction_hash, case: :lower) do
       {:ok, decoded_transaction_hash} ->
-        case query_from_db(decoded_transaction_hash) do
-          {:ok, results} when results != [] ->
-            {:ok, results}
+        case cache(decoded_transaction_hash) do
+          {:ok, cached_data} when cached_data != [] ->
+            {:ok, cached_data}
 
           [] ->
-            trigger_fetch(transaction_hash,decoded_transaction_hash)
+            trigger_fetch(transaction_hash, decoded_transaction_hash)
 
           {:error, reason} ->
             {:error, "Failed to query linked transactions: #{inspect(reason)}"}

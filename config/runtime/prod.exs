@@ -101,7 +101,6 @@ for repo <- [
       Explorer.Repo.ZkSync,
       Explorer.Repo.Neon
     ] do
-
   config :explorer, repo,
     url: System.get_env("DATABASE_URL"),
     pool_size: 1,

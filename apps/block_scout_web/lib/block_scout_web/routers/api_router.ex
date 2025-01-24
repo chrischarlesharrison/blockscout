@@ -168,6 +168,7 @@ defmodule BlockScoutWeb.Routers.ApiRouter do
       get("/:transaction_hash_param/raw-trace", V2.TransactionController, :raw_trace)
       get("/:transaction_hash_param/state-changes", V2.TransactionController, :state_changes)
       get("/:transaction_hash_param/summary", V2.TransactionController, :summary)
+
       if @chain_type == :neon do
         get("/:transaction_hash_param/external_transactions", V2.TransactionController, :external_transactions)
       end

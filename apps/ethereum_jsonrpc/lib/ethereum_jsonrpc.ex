@@ -418,7 +418,6 @@ defmodule EthereumJSONRPC do
     )
   end
 
-
   @doc """
   Retrieves Solana transactions that are linked to a given Neon transaction.
 
@@ -431,17 +430,18 @@ defmodule EthereumJSONRPC do
     - `{:error, reason}`: If the request fails
   """
   @spec get_linked_solana_transactions(
-    String.t(),
-    EthereumJSONRPC.json_rpc_named_arguments()
-    ) :: {:ok, list()} | {:error, reason:: term}
-  def get_linked_solana_transactions(transaction_hash,json_rpc_named_arguments) do
+          String.t(),
+          EthereumJSONRPC.json_rpc_named_arguments()
+        ) :: {:ok, list()} | {:error, reason :: term}
+  def get_linked_solana_transactions(transaction_hash, json_rpc_named_arguments) do
+    r =
+      request(%{
+        id: 1,
+        method: "neon_getSolanaTransactionByNeonTransaction",
+        params: [transaction_hash]
+      })
 
-    r = request(%{
-      id: 1,
-      method: "neon_getSolanaTransactionByNeonTransaction",
-      params: [transaction_hash]
-    })
-    EthereumJSONRPC.json_rpc(r,json_rpc_named_arguments)
+    EthereumJSONRPC.json_rpc(r, json_rpc_named_arguments)
   end
 
   @doc """

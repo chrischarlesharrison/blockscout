@@ -12,6 +12,7 @@ defmodule Explorer.Chain.Neon.LinkedSolanaTransactions do
   typed_schema "neon_linked_solana_transactions" do
     field(:neon_transaction_hash, :binary)
     field(:solana_transaction_hash, :string)
+
     belongs_to(:transaction, Transaction,
       foreign_key: :neon_transaction_hash,
       primary_key: true,
@@ -19,6 +20,7 @@ defmodule Explorer.Chain.Neon.LinkedSolanaTransactions do
       type: Hash.Full,
       define_field: false
     )
+
     timestamps()
   end
 
@@ -30,7 +32,9 @@ defmodule Explorer.Chain.Neon.LinkedSolanaTransactions do
     struct
     |> cast(attrs, @required_attrs)
     |> validate_required(@required_attrs)
-    |> foreign_key_constraint(:neon_transaction_hash, name: "neon_linked_solana_transactions_neon_transaction_hash_fkey")
+    |> foreign_key_constraint(:neon_transaction_hash,
+      name: "neon_linked_solana_transactions_neon_transaction_hash_fkey"
+    )
     |> unique_constraint(:solana_transaction_hash, name: "neon_linked_solana_transactions_hash_index")
   end
 end

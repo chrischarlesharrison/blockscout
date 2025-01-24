@@ -352,7 +352,7 @@ defmodule ConfigHelper do
     "zetachain",
     "zilliqa",
     "zksync",
-    "neon",
+    "neon"
   ]
 
   @spec chain_type() :: atom() | nil

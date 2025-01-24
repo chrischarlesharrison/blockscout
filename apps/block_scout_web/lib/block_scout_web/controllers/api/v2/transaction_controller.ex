@@ -256,7 +256,6 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
     handle_batch_transactions(conn, params, &ArbitrumSettlementReader.batch_transactions/2)
   end
 
-
   @doc """
     Function to handle GET requests to `/api/v2/transactions/:tx_hash/external_transactions` endpoint.
     It renders the list of external transctions that are somehow linked (eg. preceeded or initiated by) to the selected one.
@@ -271,8 +270,10 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
           conn
           |> put_status(200)
           |> json(linked_transactions)
+
         {:error, reason} ->
           Logger.error("Fetching external linked transactions failed: #{inspect(reason)}")
+
           conn
           |> put_status(500)
           |> json(%{
