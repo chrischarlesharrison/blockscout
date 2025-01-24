@@ -1698,7 +1698,7 @@ defmodule BlockScoutWeb.API.V2.TransactionControllerTest do
                }
       end
 
-      test "returns empty list when RPC returns empy list", %{conn: conn} do
+      test "returns empty list when RPC returns empty list", %{conn: conn} do
         transaction = insert(:transaction)
 
         EthereumJSONRPC.Mox

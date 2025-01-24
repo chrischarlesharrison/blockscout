@@ -258,8 +258,8 @@ defmodule BlockScoutWeb.API.V2.TransactionController do
 
   @doc """
     Function to handle GET requests to `/api/v2/transactions/:tx_hash/external_transactions` endpoint.
-    It renders the list of external transctions that are somehow linked (eg. preceeded or initiated by) to the selected one.
-    The most common use case is for sidechains and rollups. Currently implemented only for Neon chain but could also be extended for
+    It renders the list of external transactions that are somehow linked (eg. preceded or initiated by) to the selected one.
+    The most common use case is for side-chains and rollups. Currently implemented only for Neon chain but could also be extended for
     similar cases.
   """
   @spec external_transactions(Plug.Conn.t(), %{required(String.t()) => String.t()}) :: Plug.Conn.t()
