@@ -1,4 +1,7 @@
 defmodule Explorer.Chain.Neon.LinkedSolanaTransactions do
+  @moduledoc """
+  A relation table  between a regular EVM transaction and multiple Solana transactions
+  """
   use Explorer.Schema
 
   alias Explorer.Chain.{Hash, Transaction}

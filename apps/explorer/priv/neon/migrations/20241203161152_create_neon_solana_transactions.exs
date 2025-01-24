@@ -9,6 +9,6 @@ defmodule Explorer.Repo.Migrations.CreateNeonSolanaTransactions do
       add(:solana_transaction_hash, :string, null: false)
       timestamps()
     end
-    create index(:neon_linked_solana_transactions, [:neon_transaction_hash])
+    create unique_index(:linked_solana_transactions, [:neon_transaction_hash, :solana_transaction_hash])
   end
 end

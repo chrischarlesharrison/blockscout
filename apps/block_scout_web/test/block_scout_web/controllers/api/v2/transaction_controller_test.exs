@@ -1681,7 +1681,7 @@ defmodule BlockScoutWeb.API.V2.TransactionControllerTest do
         assert response = json_response(request, 500)
         assert response == %{
           "error" => "Unable to fetch external linked transactions",
-          "reason" => "\"must fail\""
+          "reason" => "\"Unable to fetch data from the node: \\\"must fail\\\"\""
         }
 
         # Test with invalid JSON RPC response
@@ -1692,7 +1692,7 @@ defmodule BlockScoutWeb.API.V2.TransactionControllerTest do
         assert response = json_response(request, 500)
         assert response == %{
           "error" => "Unable to fetch external linked transactions",
-          "reason" => "Invalid response from node"
+          "reason" => "\"Invalid response from node\""
         }
       end
 
