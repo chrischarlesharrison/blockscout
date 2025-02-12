@@ -20,6 +20,11 @@ services:
       service: db
 
   backend:
+    build:
+    context: ..
+    dockerfile: ./docker/Dockerfile
+    args:
+      RELEASE_VERSION: 6.10.2
     depends_on:
       - db
       - redis-db
